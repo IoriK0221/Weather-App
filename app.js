@@ -1,56 +1,54 @@
-window.addEventListener('load', ()=> {
+window.addEventListener('load', () => {
     let long;
     let lat;
     let temperatureDescription = document.querySelector('.temperature-description');
-    let temperatureDegree = document.querySelector('.temperature-degree');
-    let locationTimezone = document.querySelector('.location-timezone');
-    let temperatureSection = document.querySelector('.degree-section');
-    const temperatureSpan = document.querySelector('.degree-section span');
+    let degreeSection = document.querySelector('.temperature-degree');
+    let degreeFC = document.querySelector('.degree-section span');
+    let timeZone = document.querySelector('.location-timezone');
 
     if(navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-            let long = position.coords.longitude;
-            let lat = position.coords.latitude;
+        navigator.geolocation.getCurrentPosition(position =>{
+            long = position.coords.longitude;
+            lat = position.coords.latitude;
             const proxy = "https://cors-anywhere.herokuapp.com/";
-            const api = `${proxy}https://api.darksky.net/forecast/2c18bdb51f1a5f946f5a63e8a37aca02/${lat},${long}`;
-            
+            const api = `https://api.darksky.net/forecast/2c18bdb51f1a5f946f5a63e8a37aca02/${lat},${long}`;
+
             fetch(api)
                 .then(response => {
                     return response.json();
                 })
-                .then(data => {
+                .then(data =>{
                     const {temperature, summary, icon} = data.currently;
-                    //Set DOM Elements from the API
+                    //Set value for displayed information
                     temperatureDescription.textContent = summary;
-                    temperatureDegree.textContent = temperature;
-                    locationTimezone.textContent = data.timezone;
+                    timeZone.textContent = data.timezone;
+                    degreeSection.textContent = temperature;
 
-                    //Formula for Celsius
-                    let celsius = (temperature - 32) * (5 / 9);
+                    //Change F to C
+                    degreeSection.addEventListener('click', () => {
+                        if(degreeFC.textContent === 'F') {
+                            degreeFC.textContent = 'C';
+                            degreeSection.textContent = celcius.toFixed(1);
+                        } else {
+                            degreeFC.textContent = 'F';
+                            degreeSection.textContent = temperature;
+                        }
+                    })
 
-                    //Set Icon
-                    setIcons(icon, document.querySelector('.icon'));
+                    //Calculate C
+                    let celcius = (temperature - 32) * (5/9);
 
-                    //Convert F to C
-                        temperatureSection.addEventListener('click', () => {
-                            if (temperatureSpan.textContent === "F") {
-                                temperatureSpan.textContent = "C";
-                                temperatureDegree.textContent = celsius.toFixed(1);
-                            } else {
-                                temperatureSpan.textContent = "F";
-                                temperatureDegree.textContent = temperature;
-                            }
-                        })
-                });
-        });
+                    //Print weather icon
+                    setIcon(icon, document.querySelector('.icon'));
+                    
+                })
+
+                function setIcon(icon, iconID) {
+                    const skycons = new Skycons({"color": "#fff"});
+                    const currentIcon = icon.replace(/-/g, "_").toUpperCase();
+                    skycons.play();
+                    return skycons.set(iconID, Skycons[currentIcon]);
+                }
+        })
     }
-
-    function setIcons(icon, iconID){
-        const skycons = new Skycons({color: "#fff"});
-        const currentIcon = icon.replace(/-/g, "_").toUpperCase();
-        skycons.play();
-        return skycons.set(iconID, Skycons[currentIcon]);
-    }
-
-    
 });
